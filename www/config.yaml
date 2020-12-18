@@ -1,0 +1,5 @@
+mysql:
+ host: rm-uf6p7wjwix2l54dk0eo.mysql.rds.aliyuncs.com 
+ user: landmark_admin 
+ password: 
+ db: python_article 
