@@ -1,7 +1,7 @@
 '''
 Author: your name
 Date: 2020-12-11 11:02:42
-LastEditTime: 2020-12-14 19:29:49
+LastEditTime: 2021-01-13 10:18:26
 LastEditors: Please set LastEditors
 Description: In User Settings Edit
 FilePath: \leetcodei:\python-workspace\awsome-python-web\www\orm.py
@@ -62,6 +62,7 @@ async def execute(sql, args, autocommit=True):
             await conn.begin()
         try:
             async with conn.cursor(aiomysql.DictCursor) as cur:
+                print(sql)
                 await cur.execute(sql.replace("?", "%s"), args or ())
                 affected = cur.rowcount
             if not autocommit:
@@ -181,8 +182,8 @@ class ModelMetaclass(type):
         # attrs["__insert__"] = "insert into '%s' (%s,'%s') values (%s)" % (
         #     tabelName, ",".join(fields), primaryKey, create_args_string(len(fields)+1))  # insert into tablename (pk,field1,field2) values (?,?,?)#有个疑问如果插入不需要主键，主键是自动增长的呢
 
-        attrs["__insert__"] = "insert into %s (%s,%s) values (%s)" % (
-            tabelName, ",".join(fields), "" if autoIncreament else primaryKey, create_args_string(len(fields) if autoIncreament else len(fields)+1))  # insert into tablename (pk,field1,field2) values (?,?,?)#有个疑问如果插入不需要主键，主键是自动增长的呢
+        attrs["__insert__"] = "insert into %s (%s %s) values (%s)" % (
+            tabelName, ",".join(fields), "" if autoIncreament else ","+primaryKey, create_args_string(len(fields) if autoIncreament else len(fields)+1))  # insert into tablename (pk,field1,field2) values (?,?,?)#有个疑问如果插入不需要主键，主键是自动增长的呢
 
         attrs['__update__'] = 'update `%s` set %s where `%s`=?' % (tabelName, ', '.join(map(lambda f: '`%s`=?' % (
             mappings.get(f).name or f), fields)), primaryKey)  # update tablename set field1=?,fields=? where pk=?
@@ -268,7 +269,7 @@ class Model(dict, metaclass=ModelMetaclass):
         '''
         根据主键找记录
         '''
-        rs = await select("%s where '%s'=?" % (cls.__select__, cls.__primary_key__), [pk], 1)
+        rs = await select("%s where %s=?" % (cls.__select__, cls.__primary_key__), [pk], 1)
         if len(rs) == 0:
             return None
         return cls(**rs[0])

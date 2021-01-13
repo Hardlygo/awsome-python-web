@@ -1,7 +1,7 @@
 '''
 Author: your name
 Date: 2020-12-14 21:29:39
-LastEditTime: 2020-12-17 22:33:11
+LastEditTime: 2021-01-13 21:36:24
 LastEditors: Please set LastEditors
 Description: In User Settings Edit
 FilePath: \leetcodei:\python-workspace\awsome-python-web\www\coroweb.py
@@ -20,22 +20,22 @@ from aiohttp import web
 from api_error import APIError
 
 
-def get(path):
-    '''
-    get 方法的装饰器
-    '''
-    def decorator(func):
-        @functools.wraps(func)
-        async def wrraper(*args, **kw):
-            if not asyncio.iscoroutinefunction(func) and not inspect.isgeneratorfunction(func):
-                return func(*args, **kw)
-            else:
-                return await func(*args, **kw)
-        wrraper.__method__ = "GET"
-        wrraper.__route__ = path
+# def get(path):
+#     '''
+#     get 方法的装饰器
+#     '''
+#     def decorator(func):
+#         @functools.wraps(func)
+#         async def wrraper(*args, **kw):
+#             if not asyncio.iscoroutinefunction(func) and not inspect.isgeneratorfunction(func):
+#                 return func(*args, **kw)
+#             else:
+#                 return await func(*args, **kw)
+#         wrraper.__method__ = "GET"
+#         wrraper.__route__ = path
 
-        return wrraper
-    return decorator
+#         return wrraper
+#     return decorator
 
 
 def get(path):
@@ -141,7 +141,7 @@ def has_request_arg(fn):
 
 class RequestHandler(object):
     def __init__(self, app, fn):
-        print("处理函数", fn.__name__)
+        # print("处理函数", fn.__name__)
         self._app = app
         self._func = fn
         self._has_request_arg = has_request_arg(fn)
@@ -172,7 +172,7 @@ class RequestHandler(object):
                 if qs:
                     kw = dict()
                     for k, v in parse.parse_qs(qs, True).items():
-                        kw[k] = v
+                        kw[k] = v[0]
         if kw is None:
             kw = dict(**request.match_info)
         else:
@@ -197,7 +197,7 @@ class RequestHandler(object):
         # check required kw:
         if self._required_kw_args:
             for name in self._required_kw_args:
-                if not name in kw.items():
+                if not name in kw:
                     return web.HTTPBadRequest('Missing argument: %s' % name)
 
         logging.info('call with args: %s' % str(kw))
@@ -229,8 +229,8 @@ def add_route(app, fn):
     if not method or not route:
         raise ValueError('@get or @post not defined in %s.' % str(fn))
 
-    print("%s是async函数吗？" % fn.__name__,
-          "是" if inspect.iscoroutinefunction(fn) else "否")
+    # print("%s是async函数吗？" % fn.__name__,
+    #       "是" if inspect.iscoroutinefunction(fn) else "否")
     # if not asyncio.iscoroutinefunction(fn):
     #     fn = asyncio.coroutine(method)
     if not asyncio.iscoroutinefunction(fn) and not inspect.isgeneratorfunction(fn):
@@ -256,11 +256,10 @@ def add_routes(app, module_name):
         name = module_name[n+1:]
         mod = getattr(__import__(
             module_name[:n], globals(), locals(), [name]), name)
-
     for attr in dir(mod):
         if attr.startswith("_"):
             continue
-        fn = getattr(mod, 'attr')
+        fn = getattr(mod, attr)
         if callable(fn):
             method = getattr(fn, '__method__', None)
             route = getattr(fn, '__route__', None)

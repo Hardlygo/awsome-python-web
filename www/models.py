@@ -1,7 +1,7 @@
 '''
 Author: your name
 Date: 2020-12-14 09:38:11
-LastEditTime: 2020-12-14 18:22:46
+LastEditTime: 2021-01-13 10:46:58
 LastEditors: Please set LastEditors
 Description: In User Settings Edit
 FilePath: \leetcodei:\python-workspace\awsome-python-web\www\models.py
@@ -42,9 +42,10 @@ class Blog(Model):
     id = IntegerField("id", primary_key=True, column_type="int(11)")
     user_id = StringField("user_id", column_type="varchar(50)")
     user_name = StringField("user_name", column_type="varchar(50)")
+    user_avatar = StringField("user_avatar", column_type="varchar(500)")
     title = StringField("title", column_type="varchar(50)")
     summary = StringField("summary", column_type="varchar(200)")
-    content = TextField("conntent")
+    content = TextField("content")
     created_at = FloatField("created_at", default=time.time)
 
 
